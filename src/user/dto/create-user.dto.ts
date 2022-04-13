@@ -1,8 +1,11 @@
 import { IsArray, IsBoolean, IsIn, IsNotEmpty, IsNumberString, IsString, Length } from 'class-validator';
-
+import { IsNickNameType } from '../pipe/nickname-type.pipe';
 export class CreateUserDto {
   // 用户昵称
   @IsNotEmpty()
+  @IsNickNameType('', {
+    message: '必须是大写字母小写字母数字特殊符号的组合',
+  })
   @Length(1, 20, {
     message: '长度不行',
   })
