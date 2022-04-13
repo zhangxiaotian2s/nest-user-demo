@@ -1,15 +1,9 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Post,
-  Put,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
+import { UserService } from './user.service';
 
 @Controller('user')
 export class UserController {
+  constructor(private readonly userService: UserService) {}
   /****************************************************
    * 方法: 创建一个用户
    * 参数:
@@ -18,7 +12,7 @@ export class UserController {
    ****************************************************/
   @Post('create')
   async createUser(@Body() body) {
-    return body;
+    return this.userService.createUser(body);
   }
   /****************************************************
    * 方法:根据id 获取指定用户信息
@@ -28,7 +22,7 @@ export class UserController {
    ****************************************************/
   @Get(':id')
   async getUserByID(@Param('id') id) {
-    return id;
+    return this.userService.findUserById(id);
   }
   /****************************************************
    * 方法: 修改指定用户
@@ -38,10 +32,7 @@ export class UserController {
    ****************************************************/
   @Put(':id')
   async updateUserById(@Param('id') id, @Body() body) {
-    return {
-      id,
-      body,
-    };
+    return this.userService.updateUserById(id, body);
   }
   /****************************************************
    * 方法: 删除指定用户
@@ -51,6 +42,6 @@ export class UserController {
    ****************************************************/
   @Delete(':id')
   async deleteUserById(@Param('id') id) {
-    return id;
+    return this.userService.removeUserById(id);
   }
 }
