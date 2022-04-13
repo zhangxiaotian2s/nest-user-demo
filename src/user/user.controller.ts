@@ -1,5 +1,7 @@
-import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { UserService } from './user.service';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Controller('user')
 export class UserController {
@@ -10,38 +12,48 @@ export class UserController {
    * 返回:
    * 时间: 2022-04-13
    ****************************************************/
-  @Post('create')
-  async createUser(@Body() body) {
-    return this.userService.createUser(body);
+  @Post()
+  create(@Body() createUserDto: CreateUserDto) {
+    return this.userService.create(createUserDto);
   }
   /****************************************************
-   * 方法:根据id 获取指定用户信息
+   * 方法: 查询所有用户
+   * 参数:
+   * 返回:
+   * 时间: 2022-04-13
+   ****************************************************/
+  @Get('')
+  findAll() {
+    return this.userService.findAll();
+  }
+  /****************************************************
+   * 方法: 获取指定id 用户信息
    * 参数:
    * 返回:
    * 时间: 2022-04-13
    ****************************************************/
   @Get(':id')
-  async getUserByID(@Param('id') id) {
-    return this.userService.findUserById(id);
+  findOne(@Param('id') id: string) {
+    return this.userService.findOne(+id);
   }
   /****************************************************
-   * 方法: 修改指定用户
+   * 方法: 更新指定id 用户信息
    * 参数:
    * 返回:
    * 时间: 2022-04-13
    ****************************************************/
-  @Put(':id')
-  async updateUserById(@Param('id') id, @Body() body) {
-    return this.userService.updateUserById(id, body);
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+    return this.userService.update(+id, updateUserDto);
   }
   /****************************************************
-   * 方法: 删除指定用户
+   * 方法: 删除指定id 用户
    * 参数:
    * 返回:
    * 时间: 2022-04-13
    ****************************************************/
   @Delete(':id')
-  async deleteUserById(@Param('id') id) {
-    return this.userService.removeUserById(id);
+  remove(@Param('id') id: string) {
+    return this.userService.remove(+id);
   }
 }
