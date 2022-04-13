@@ -2,7 +2,6 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UsePipes } from '@ne
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { CreateUserPipe } from './pipe/create-user.pipe';
 
 @Controller('user')
 export class UserController {
@@ -14,7 +13,6 @@ export class UserController {
    * 时间: 2022-04-13
    ****************************************************/
   @Post()
-  @UsePipes(new CreateUserPipe())
   create(@Body() createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto);
   }
