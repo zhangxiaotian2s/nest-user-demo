@@ -6,6 +6,7 @@ async function bootstrap() {
 
   // 设置个全局的公共路径 /admin/user/xxx
   app.setGlobalPrefix('admin');
+  // 挂载管道
   await app.listen(3000);
 }
 bootstrap();
