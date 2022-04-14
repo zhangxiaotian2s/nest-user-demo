@@ -1,8 +1,6 @@
-import { Injectable, ServiceUnavailableException } from '@nestjs/common';
+import { HttpException, Injectable, ServiceUnavailableException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { UserEntity } from './entities/user.entity';
 
 @Injectable()
@@ -33,7 +31,7 @@ export class UserService {
    * 返回:
    * 时间: 2022-04-13
    ****************************************************/
-  findAll() {
+  async findAll() {
     return `This action returns all user`;
   }
   /****************************************************
@@ -42,8 +40,14 @@ export class UserService {
    * 返回:
    * 时间: 2022-04-13
    ****************************************************/
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOne(id: number) {
+    try {
+      const result = this.userRepository.findOne({ where: { id } });
+      console.log(result);
+      return result;
+    } catch (error) {
+      throw new ServiceUnavailableException(error);
+    }
   }
   /****************************************************
    * 方法: 更新指定id 用户信息
@@ -51,8 +55,22 @@ export class UserService {
    * 返回:
    * 时间: 2022-04-13
    ****************************************************/
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(id: number, updateUserDto: Partial<UserEntity>) {
+    try {
+      // const exitUser = await this.userRepository.findOne({ where: { id } });
+      // if (!exitUser) {
+      //   throw new NotFoundException(`用户id 为：${id} 的用户不存在`);
+      // }
+      // const result = this.userRepository.merge(exitUser, updateUserDto);
+      // return await this.userRepository.save(result);
+
+      // 用这个方法好  网上的方法比较狗篮子
+      const result = await this.userRepository.update(id, updateUserDto);
+      console.log(result);
+      return result;
+    } catch (error) {
+      throw new ServiceUnavailableException(error);
+    }
   }
   /****************************************************
    * 方法: 删除指定id 用户
@@ -60,7 +78,17 @@ export class UserService {
    * 返回:
    * 时间: 2022-04-13
    ****************************************************/
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(id: number) {
+    try {
+      const result = await this.userRepository.delete(id);
+      console.log(result);
+      if (result.affected >= 1) {
+        return new HttpException('删除成功', 10000);
+      } else {
+        return new HttpException('删除失败,你要删除的那个用户不存在', 50000);
+      }
+    } catch (error) {
+      throw new ServiceUnavailableException(error);
+    }
   }
 }

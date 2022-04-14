@@ -3,7 +3,7 @@ import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserEntity } from './entities/user.entity';
-
+import * as Utils from 'util';
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
@@ -37,8 +37,9 @@ export class UserController {
    * 时间: 2022-04-13
    ****************************************************/
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(+id);
+  async findOne(@Param('id') id: string) {
+    const result = await this.userService.findOne(+id);
+    return result;
   }
   /****************************************************
    * 方法: 更新指定id 用户信息
@@ -48,7 +49,11 @@ export class UserController {
    ****************************************************/
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(+id, updateUserDto);
+    const _userObj: Partial<UserEntity> = {};
+    Object.assign(_userObj, updateUserDto);
+    _userObj.group = _userObj.group.toString();
+
+    return this.userService.update(+id, _userObj);
   }
   /****************************************************
    * 方法: 删除指定id 用户
