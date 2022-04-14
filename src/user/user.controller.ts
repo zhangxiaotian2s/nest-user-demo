@@ -1,9 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UsePipes, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UsePipes, Query, UseInterceptors } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserEntity } from './entities/user.entity';
 import { ListArgsInterface } from './interface/user.interface';
+import { TransformUserInterceptor } from './interceptor/transform-user.interceptor';
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
@@ -27,6 +28,7 @@ export class UserController {
    * 时间: 2022-04-13
    ****************************************************/
   @Get()
+  @UseInterceptors(new TransformUserInterceptor('all'))
   findAll(@Query() query: ListArgsInterface) {
     console.log(query);
     return this.userService.findAll(query);
@@ -38,6 +40,7 @@ export class UserController {
    * 时间: 2022-04-13
    ****************************************************/
   @Get(':id')
+  @UseInterceptors(new TransformUserInterceptor('single'))
   async findOne(@Param('id') id: string) {
     const result = await this.userService.findOne(+id);
     return result;
