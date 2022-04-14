@@ -1,9 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UsePipes } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UsePipes, Query } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserEntity } from './entities/user.entity';
-import * as Utils from 'util';
+import { ListArgsInterface } from './interface/user.interface';
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
@@ -22,13 +22,14 @@ export class UserController {
   }
   /****************************************************
    * 方法: 查询所有用户
-   * 参数:
+   * 参数: pageIndex=1, pageSize=10
    * 返回:
    * 时间: 2022-04-13
    ****************************************************/
-  @Get('')
-  findAll() {
-    return this.userService.findAll();
+  @Get()
+  findAll(@Query() query: ListArgsInterface) {
+    console.log(query);
+    return this.userService.findAll(query);
   }
   /****************************************************
    * 方法: 获取指定id 用户信息

@@ -2,6 +2,7 @@ import { HttpException, Injectable, ServiceUnavailableException } from '@nestjs/
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserEntity } from './entities/user.entity';
+import { ListArgsInterface, UserListInterface } from './interface/user.interface';
 
 @Injectable()
 export class UserService {
@@ -31,8 +32,32 @@ export class UserService {
    * 返回:
    * 时间: 2022-04-13
    ****************************************************/
-  async findAll() {
-    return `This action returns all user`;
+  async findAll(query: ListArgsInterface): Promise<UserListInterface> {
+    try {
+      const userQB = await this.userRepository.createQueryBuilder('user');
+      userQB.orderBy('user.update_time', 'DESC');
+      const count = await userQB.getCount();
+      const { pageIndex = 1, pageSize = 10 } = query;
+
+      // qb.limit(pageSize);
+      // qb.offset((pageIndex - 1) * pageSize);
+      // const userList = await qb.getMany();
+
+      const userList = await userQB
+        .skip((pageIndex - 1) * pageSize)
+        .take(pageSize)
+        .getMany();
+      console.log(userList);
+      return {
+        list: userList,
+        pageIndex: Number(pageIndex),
+        pageSize: Number(pageSize),
+        pageCount: Math.ceil(count / pageSize),
+        count,
+      };
+    } catch (error) {
+      throw new ServiceUnavailableException(error);
+    }
   }
   /****************************************************
    * 方法: 查找指定id 用户信息
