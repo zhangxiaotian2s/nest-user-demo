@@ -1,17 +1,31 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ServiceUnavailableException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UserEntity } from './entities/user.entity';
 
 @Injectable()
 export class UserService {
+  constructor(
+    @InjectRepository(UserEntity)
+    private readonly userRepository: Repository<UserEntity>,
+  ) {}
   /****************************************************
    * 方法: 创建一个新用户
    * 参数:
    * 返回:
    * 时间: 2022-04-13
    ****************************************************/
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  async create(createUserDto: Partial<UserEntity>): Promise<UserEntity> {
+    try {
+      const result = await this.userRepository.save(createUserDto);
+      console.log(result);
+      return result;
+    } catch (error) {
+      console.log(error);
+      throw new ServiceUnavailableException(error);
+    }
   }
   /****************************************************
    * 方法: 查找全部用户

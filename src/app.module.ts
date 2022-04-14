@@ -11,7 +11,7 @@ import { UserModule } from './user/user.module';
       port: 3306,
       username: 'root',
       password: '12345678',
-      database: 'myAdmin',
+      database: 'userDemo',
       autoLoadEntities: true,
       entities: [],
       synchronize: true,

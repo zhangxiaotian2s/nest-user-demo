@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UsePipes } from '@ne
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UserEntity } from './entities/user.entity';
 
 @Controller('user')
 export class UserController {
@@ -14,7 +15,10 @@ export class UserController {
    ****************************************************/
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.create(createUserDto);
+    const _userObj: Partial<UserEntity> = {};
+    Object.assign(_userObj, createUserDto);
+    _userObj.group = _userObj.group.toString();
+    return this.userService.create(_userObj);
   }
   /****************************************************
    * 方法: 查询所有用户
