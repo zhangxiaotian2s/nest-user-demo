@@ -89,7 +89,7 @@ export class UserService {
       // const result = this.userRepository.merge(exitUser, updateUserDto);
       // return await this.userRepository.save(result);
 
-      // 用这个方法好  网上的方法比较狗篮子
+      // 用这个方法好
       const result = await this.userRepository.update(id, updateUserDto);
       console.log(result);
       return result;
@@ -107,11 +107,7 @@ export class UserService {
     try {
       const result = await this.userRepository.delete(id);
       console.log(result);
-      if (result.affected >= 1) {
-        return new HttpException('删除成功', 10000);
-      } else {
-        return new HttpException('删除失败,你要删除的那个用户不存在', 50000);
-      }
+      return result;
     } catch (error) {
       throw new ServiceUnavailableException(error);
     }

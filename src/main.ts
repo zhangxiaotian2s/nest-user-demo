@@ -1,6 +1,8 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { AllExceptionFilter } from './core/filter/all-exception.filter';
+import { TransformInterceptor } from './core/interceptor/transform.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -9,7 +11,10 @@ async function bootstrap() {
   app.setGlobalPrefix('admin');
   // 挂载管道
   app.useGlobalPipes(new ValidationPipe());
-
+  // 挂载全局拦截器
+  app.useGlobalInterceptors(new TransformInterceptor());
+  // 挂载全局过滤器
+  app.useGlobalFilters(new AllExceptionFilter());
   await app.listen(3000);
 }
 bootstrap();

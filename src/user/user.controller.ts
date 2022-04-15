@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UsePipes, Query, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UsePipes, Query, UseInterceptors, NotFoundException } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -43,6 +43,9 @@ export class UserController {
   @UseInterceptors(new TransformUserInterceptor('single'))
   async findOne(@Param('id') id: string) {
     const result = await this.userService.findOne(+id);
+    if (!result) {
+      throw new NotFoundException(`没有找到id 为${id}`);
+    }
     return result;
   }
   /****************************************************
@@ -52,12 +55,18 @@ export class UserController {
    * 时间: 2022-04-13
    ****************************************************/
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+  @UseInterceptors(new TransformUserInterceptor('single'))
+  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     const _userObj: Partial<UserEntity> = {};
     Object.assign(_userObj, updateUserDto);
     _userObj.group = _userObj.group.toString();
 
-    return this.userService.update(+id, _userObj);
+    const result = await this.userService.update(+id, _userObj);
+    if (result.affected == 0) {
+      throw new NotFoundException(`没有找到用户id为：${id}的用户`);
+    } else {
+      return await this.userService.findOne(+id);
+    }
   }
   /****************************************************
    * 方法: 删除指定id 用户
@@ -66,7 +75,13 @@ export class UserController {
    * 时间: 2022-04-13
    ****************************************************/
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.userService.remove(+id);
+  async remove(@Param('id') id: string) {
+    const result = await this.userService.remove(+id);
+    console.log(result);
+    if (result.affected >= 1) {
+      return null;
+    } else {
+      throw new NotFoundException('删除失败,你要删除的那个用户不存在');
+    }
   }
 }
