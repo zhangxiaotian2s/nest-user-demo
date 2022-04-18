@@ -4,8 +4,10 @@ import { map, Observable } from 'rxjs';
 @Injectable()
 export class TransformUserInterceptor implements NestInterceptor {
   private type;
-  constructor(type: 'single' | 'all') {
+  private key;
+  constructor(type: 'single' | 'all', key?: string) {
     this.type = type;
+    this.key = key || '';
   }
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
@@ -17,7 +19,11 @@ export class TransformUserInterceptor implements NestInterceptor {
           return null;
         }
         if (this.type === 'single') {
-          data.group = data.group.split(',');
+          if (this.key) {
+            splitStrToArray(data, this.key);
+          } else {
+            data.group = data.group.split(',');
+          }
         }
         if (this.type === 'all') {
           data.list.forEach((item) => {
@@ -27,5 +33,24 @@ export class TransformUserInterceptor implements NestInterceptor {
         return data;
       }),
     );
+  }
+}
+//
+function splitStrToArray(data, key) {
+  if (key.indexOf('.') > -1) {
+    const keyArr = key.split('.');
+    deepSplitData(data, keyArr);
+  } else {
+    data[key] = data[key].group.split(',');
+  }
+}
+// 递归
+function deepSplitData(data, keys) {
+  if (keys.length == 1 && data[keys[0]] && data[keys[0]].group) {
+    data[keys[0]].group = data[keys[0]].group.split(',');
+  }
+  const key = keys.shift();
+  if (data && data[key]) {
+    deepSplitData(data[key], keys);
   }
 }

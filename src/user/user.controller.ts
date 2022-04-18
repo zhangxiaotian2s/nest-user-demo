@@ -4,7 +4,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserEntity } from './entities/user.entity';
 import { ListArgsInterface } from './interface/user.interface';
-import { TransformUserInterceptor } from './interceptor/transform-user.interceptor';
+import { TransformUserInterceptor } from '../core/interceptor/transform-user.interceptor';
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
