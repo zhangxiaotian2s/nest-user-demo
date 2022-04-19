@@ -77,6 +77,7 @@ export class UserController {
    * 时间: 2022-04-13
    ****************************************************/
   @Delete(':id')
+  @UseGuards(AuthGuard('admin'))
   async remove(@Param('id') id: string) {
     const result = await this.userService.remove(+id);
     console.log(result);
