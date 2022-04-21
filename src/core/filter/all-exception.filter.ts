@@ -1,5 +1,6 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpException } from '@nestjs/common';
 import { Logger } from '../utils/log4js';
+import filterCode from './filter-code';
 
 @Catch()
 export class AllExceptionFilter implements ExceptionFilter {
@@ -20,6 +21,7 @@ export class AllExceptionFilter implements ExceptionFilter {
     if (errmessage instanceof Array) {
       errmessage = errmessage[0];
     }
+    const message = filterCode(status, errmessage);
 
     // 自定义异常结构体, 日志用
     const logger = {
@@ -27,7 +29,7 @@ export class AllExceptionFilter implements ExceptionFilter {
       diff_time: Date.now() - res.logger.start_time,
       http_code: 200,
       errorCode: status,
-      errorMsg: errmessage,
+      errorMsg: message,
       errmessage: errmessage,
     };
     Logger.error(
@@ -39,8 +41,8 @@ export class AllExceptionFilter implements ExceptionFilter {
 
     const errorResponse = {
       data: null,
-      msg: errmessage,
-      code: 50000,
+      msg: message,
+      code: status > 50000 ? status : 50000, //用自定义的错误code 都应该在50000 以上的数值来定义
     };
     // 设置返回的状态码， 请求头，发送错误信息
     req.status(200);

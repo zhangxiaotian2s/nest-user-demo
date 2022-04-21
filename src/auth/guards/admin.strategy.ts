@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { UserEntity } from 'src/user/entities/user.entity';
@@ -19,7 +19,7 @@ export class AdminStrategy extends PassportStrategy(Strategy, 'admin') {
     if (payload.limit == 1) {
       return { ...payload };
     } else {
-      throw new UnauthorizedException('您的权限不足');
+      throw new ForbiddenException();
     }
   }
 }

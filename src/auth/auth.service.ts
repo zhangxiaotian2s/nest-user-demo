@@ -31,7 +31,7 @@ export class AuthService {
    * 时间: 2022-04-18
    ****************************************************/
   async login(user: UserEntity): Promise<any> {
-    const { id, password, limit, nickname, group, status } = user;
+    const { id, limit, nickname, group, status } = user;
     const userInfo = {
       uid: id,
       nickname,
@@ -39,7 +39,7 @@ export class AuthService {
       status,
     };
     return {
-      token: this.jwtService.sign({ id, password, limit }),
+      token: this.jwtService.sign({ id, limit }),
       userInfo,
     };
   }
