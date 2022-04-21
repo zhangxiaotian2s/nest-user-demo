@@ -14,6 +14,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
   }
   async validate(username: string, password: string): Promise<UserEntity> {
     const user = await this.authService.validate(+username, password);
+    console.log('我是守卫：我再进行登录的账号密码校验');
     if (user) {
       return user;
     } else {

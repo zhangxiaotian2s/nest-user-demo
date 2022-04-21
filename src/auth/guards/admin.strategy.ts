@@ -16,7 +16,6 @@ export class AdminStrategy extends PassportStrategy(Strategy, 'admin') {
     // console.log('我是jwt.strategy', payload);
     // //payload：jwt-passport认证jwt通过后解码的结果
     // console.log(handleBack);
-    console.log(payload);
     if (payload.limit == 1) {
       return { ...payload };
     } else {

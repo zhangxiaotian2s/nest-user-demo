@@ -32,7 +32,6 @@ export class UserController {
   @Get()
   @UseInterceptors(new TransformUserInterceptor('all'))
   findAll(@Query() query: ListArgsInterface) {
-    console.log(query);
     return this.userService.findAll(query);
   }
   /****************************************************

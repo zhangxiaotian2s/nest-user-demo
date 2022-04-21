@@ -11,10 +11,10 @@ export class TransformUserInterceptor implements NestInterceptor {
   }
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
-    console.log('我是局部拦截器：我再进入controller 之前');
+    console.log('我是拦截器: transform-user 局部 进文');
     return next.handle().pipe(
       map((data) => {
-        console.log('我是局部拦截器：我再进入controller 之后', data);
+        console.log('我是拦截器: transform-user 局部 出文');
         if (!data) {
           return null;
         }

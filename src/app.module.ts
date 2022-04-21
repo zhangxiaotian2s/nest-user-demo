@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
+import { DbLogger } from './core/utils/log4js';
 
 @Module({
   imports: [
@@ -16,6 +17,8 @@ import { AuthModule } from './auth/auth.module';
       autoLoadEntities: true,
       entities: [],
       synchronize: true,
+      logging: true,
+      logger: new DbLogger(),
     }),
     AuthModule,
   ],

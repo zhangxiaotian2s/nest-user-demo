@@ -47,7 +47,6 @@ export class UserService {
         .skip((pageIndex - 1) * pageSize)
         .take(pageSize)
         .getMany();
-      console.log(userList);
       return {
         list: userList,
         pageIndex: Number(pageIndex),
