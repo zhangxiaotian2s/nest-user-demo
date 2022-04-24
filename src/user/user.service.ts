@@ -1,5 +1,6 @@
-import { HttpException, Injectable, ServiceUnavailableException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { RedisCacheService } from 'src/redis-cache/redis-cache.service';
 import { Repository } from 'typeorm';
 import { UserEntity } from './entities/user.entity';
 import { ListArgsInterface, UserListInterface } from './interface/user.interface';
@@ -9,6 +10,7 @@ export class UserService {
   constructor(
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
+    private readonly redisCacheService: RedisCacheService,
   ) {}
   /****************************************************
    * 方法: 创建一个新用户
@@ -19,11 +21,10 @@ export class UserService {
   async create(createUserDto: Partial<UserEntity>): Promise<UserEntity> {
     try {
       const result = await this.userRepository.save(createUserDto);
-      console.log(result);
       return result;
     } catch (error) {
       console.log(error);
-      throw new ServiceUnavailableException(error);
+      throw error;
     }
   }
   /****************************************************
@@ -55,7 +56,7 @@ export class UserService {
         count,
       };
     } catch (error) {
-      throw new ServiceUnavailableException(error);
+      throw error;
     }
   }
   /****************************************************
@@ -64,13 +65,19 @@ export class UserService {
    * 返回:
    * 时间: 2022-04-13
    ****************************************************/
+
   async findOne(id: number) {
     try {
-      const result = this.userRepository.findOne({ where: { id } });
-      console.log(result);
-      return result;
+      const cacheResult = await this.redisCacheService.cacheGet(`user${id}`);
+      if (cacheResult) {
+        return cacheResult;
+      } else {
+        const result = await this.userRepository.findOne({ where: { id } });
+        await this.redisCacheService.cacheSet(`user${id}`, result, 1000);
+        return result;
+      }
     } catch (error) {
-      throw new ServiceUnavailableException(error);
+      throw error;
     }
   }
   /****************************************************
@@ -93,7 +100,7 @@ export class UserService {
       console.log(result);
       return result;
     } catch (error) {
-      throw new ServiceUnavailableException(error);
+      throw error;
     }
   }
   /****************************************************
@@ -108,7 +115,7 @@ export class UserService {
       console.log(result);
       return result;
     } catch (error) {
-      throw new ServiceUnavailableException(error);
+      throw error;
     }
   }
 }

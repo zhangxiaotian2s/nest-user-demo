@@ -14,14 +14,14 @@ export class AuthService {
    ****************************************************/
   async validate(id: number, password: string): Promise<UserEntity> {
     try {
-      const result = await this.userService.findOne(id);
+      const result: Partial<UserEntity> = await this.userService.findOne(id);
       if (result && result.password === password) {
-        return result;
+        return result as UserEntity;
       } else {
         return null;
       }
-    } catch (e) {
-      throw new UnauthorizedException(e);
+    } catch (error) {
+      throw error;
     }
   }
   /****************************************************

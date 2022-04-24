@@ -9,7 +9,7 @@ export class AllExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const req = ctx.getResponse();
     const res = ctx.getRequest();
-    console.log('我是filter:  我在处理错误');
+    console.log('我是filter:  我在处理错误', exception);
     const status = (exception && exception.getStatus()) || 500;
 
     let errmessage = exception.getResponse();
