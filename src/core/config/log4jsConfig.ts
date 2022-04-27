@@ -2,7 +2,7 @@
 
 import * as path from 'path';
 console.log(__dirname);
-const baseLogPath = path.resolve(__dirname, '../../../logs');
+const baseLogPath = path.resolve(__dirname, '../../../../logs');
 
 const log4jsConfig = {
   appenders: {

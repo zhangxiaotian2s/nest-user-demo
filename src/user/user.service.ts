@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
+import { Interval } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
+import { objectKeyToArray } from 'src/core/utils/helper';
 import { RedisCacheService } from 'src/redis-cache/redis-cache.service';
 import { Repository } from 'typeorm';
 import { UserEntity } from './entities/user.entity';
 import { ListArgsInterface, UserListInterface } from './interface/user.interface';
-
 @Injectable()
 export class UserService {
   constructor(
@@ -21,6 +22,7 @@ export class UserService {
   async create(createUserDto: Partial<UserEntity>): Promise<UserEntity> {
     try {
       const result = await this.userRepository.save(createUserDto);
+      this.redisCacheService.cacheSet(`user_${result.id}`, result);
       return result;
     } catch (error) {
       console.log(error);
@@ -35,21 +37,35 @@ export class UserService {
    ****************************************************/
   async findAll(query: ListArgsInterface): Promise<UserListInterface> {
     try {
+      const { pageIndex = 1, pageSize = 10 } = query;
+      return await this.findForUserPage(pageIndex, pageSize);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /****************************************************
+   * 方法: 分页查询用户
+   * 描述: 分页查询用户 @Interval(10000) 每10秒执行一次
+   * 参数: pageIndex: 页码  pageSize: 每页数量
+   * 返回: { list: [], pageIndex: 1, pageSize: 10, pageCount: 1, count: 1 }
+   * 时间: 2022-04-27
+   ****************************************************/
+  @Interval(10000)
+  private async findForUserPage(pageIndex = 1, pageSize = 10): Promise<UserListInterface> {
+    try {
       const userQB = await this.userRepository.createQueryBuilder('user');
       userQB.orderBy('user.update_time', 'DESC');
       const count = await userQB.getCount();
-      const { pageIndex = 1, pageSize = 10 } = query;
-
-      // qb.limit(pageSize);
-      // qb.offset((pageIndex - 1) * pageSize);
-      // const userList = await qb.getMany();
-
-      const userList = await userQB
-        .skip((pageIndex - 1) * pageSize)
-        .take(pageSize)
-        .getMany();
+      const userSQ = userQB.skip((pageIndex - 1) * pageSize).take(pageSize);
+      const listIds = await userSQ.getMany();
+      const keys = objectKeyToArray(listIds, 'id', 'user');
+      const list = await this.redisCacheService.cacheWrap(keys, async (callback) => {
+        const _list = await userSQ.getMany();
+        callback(null, _list);
+      });
       return {
-        list: userList,
+        list: list,
         pageIndex: Number(pageIndex),
         pageSize: Number(pageSize),
         pageCount: Math.ceil(count / pageSize),
@@ -73,7 +89,7 @@ export class UserService {
         return cacheResult;
       } else {
         const result = await this.userRepository.findOne({ where: { id } });
-        await this.redisCacheService.cacheSet(`user${id}`, result, 1000);
+        this.redisCacheService.cacheSet(`user_${id}`, result);
         return result;
       }
     } catch (error) {
@@ -88,16 +104,8 @@ export class UserService {
    ****************************************************/
   async update(id: number, updateUserDto: Partial<UserEntity>) {
     try {
-      // const exitUser = await this.userRepository.findOne({ where: { id } });
-      // if (!exitUser) {
-      //   throw new NotFoundException(`用户id 为：${id} 的用户不存在`);
-      // }
-      // const result = this.userRepository.merge(exitUser, updateUserDto);
-      // return await this.userRepository.save(result);
-
-      // 用这个方法好
       const result = await this.userRepository.update(id, updateUserDto);
-      console.log(result);
+      this.redisCacheService.cacheDelete(`user_${id}`);
       return result;
     } catch (error) {
       throw error;
@@ -112,7 +120,7 @@ export class UserService {
   async remove(id: number) {
     try {
       const result = await this.userRepository.delete(id);
-      console.log(result);
+      this.redisCacheService.cacheDelete(`user_${id}`);
       return result;
     } catch (error) {
       throw error;

@@ -17,6 +17,7 @@ export class UserController {
    * 时间: 2022-04-13
    ****************************************************/
   @Post()
+  @UseInterceptors(new TransformUserInterceptor('single'))
   create(@Body() createUserDto: CreateUserDto) {
     const _userObj: Partial<UserEntity> = {};
     Object.assign(_userObj, createUserDto);
